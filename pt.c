@@ -27,7 +27,7 @@ void page_table_update(uint64_t pt, uint64_t vpn, uint64_t ppn)
             }
             if (i < 4)
             {
-                curr_node = phys_to_virt((curr_pte<<1)>>1);
+                curr_node = phys_to_virt(curr_pte - 1);
             }
             else
             {
@@ -54,9 +54,8 @@ void page_table_update(uint64_t pt, uint64_t vpn, uint64_t ppn)
                 {
                     curr_ppn = curr_pte >> 12;
                 }
-
-                curr_node = phys_to_virt(curr_ppn << 12);
                 curr_node[index] = ((curr_ppn << 12) | 1);
+                curr_node = phys_to_virt(curr_ppn << 12);
             }
             else
             {
@@ -85,9 +84,9 @@ uint64_t page_table_query(uint64_t pt, uint64_t vpn)
         }
         if (i < 4)
         {
-            curr_node = phys_to_virt((curr_pte<<1)>>1);
+            curr_node = phys_to_virt(curr_pte - 1);
         }
     }
 
-    return (curr_pte >> 12);
+    return (curr_pte >> 12);
 }
