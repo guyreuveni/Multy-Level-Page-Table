@@ -10,7 +10,8 @@ void page_table_update(uint64_t pt, uint64_t vpn, uint64_t ppn)
 {
     uint64_t *curr_node = phys_to_virt(pt << 12);
     uint64_t index, curr_pte, curr_ppn;
-    uint64_t mask = 511;
+    uint64_t mask = (uint64_t)511;
+    mask = mask << 36;
     int i;
 
     if (ppn == NO_MAPPING)
@@ -18,7 +19,8 @@ void page_table_update(uint64_t pt, uint64_t vpn, uint64_t ppn)
         for (i = 0; i < 5; i++)
         {
             index = mask & vpn;
-            vpn = vpn >> 9;
+            index = index >> 36;
+            vpn = vpn << 9;
 
             curr_pte = curr_node[index];
             if (!pte_is_valid(curr_pte))
@@ -41,7 +43,8 @@ void page_table_update(uint64_t pt, uint64_t vpn, uint64_t ppn)
         for (i = 0; i < 5; i++)
         {
             index = mask & vpn;
-            vpn = vpn >> 9;
+            index = index >> 36;
+            vpn = vpn << 9;
             curr_pte = curr_node[index];
 
             if (i < 4)
@@ -69,13 +72,15 @@ uint64_t page_table_query(uint64_t pt, uint64_t vpn)
 {
     uint64_t *curr_node = phys_to_virt(pt << 12);
     uint64_t index, curr_pte;
-    uint64_t mask = 511;
+    uint64_t mask = (uint64_t)511;
+    mask = mask << 36;
     int i;
 
     for (i = 0; i < 5; i++)
     {
         index = mask & vpn;
-        vpn = vpn >> 9;
+        index = index >> 36;
+        vpn = vpn << 9;
 
         curr_pte = curr_node[index];
         if (!pte_is_valid(curr_pte))
