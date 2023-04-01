@@ -89,5 +89,5 @@ uint64_t page_table_query(uint64_t pt, uint64_t vpn)
         }
     }
 
-    return curr_pte >> 12;
+    return (curr_pte >> 12);
 }
