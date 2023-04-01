@@ -1,4 +1,4 @@
-#include os.h
+#include "os.h"
 
 int pte_is_valid(uint64_t pte)
 {
@@ -8,13 +8,14 @@ int pte_is_valid(uint64_t pte)
 
 void page_table_update(uint64_t pt, uint64_t vpn, uint64_t ppn)
 {
-    uint64_t **curr_node = phys_to_virt(pt);
+    uint64_t *curr_node = phys_to_virt(pt << 12);
     uint64_t index, curr_pte, curr_ppn;
     uint64_t mask = 511;
+    int i;
 
     if (ppn == NO_MAPPING)
     {
-        for (int i = 0; i < 5; i++)
+        for (i = 0; i < 5; i++)
         {
             index = mask & vpn;
             vpn = vpn >> 9;
@@ -26,8 +27,7 @@ void page_table_update(uint64_t pt, uint64_t vpn, uint64_t ppn)
             }
             if (i < 4)
             {
-                curr_ppn = curr_pte >> 12;
-                curr_node = phys_to_virt(cur_ppn);
+                curr_node = phys_to_virt((curr_pte<<1)>>1);
             }
             else
             {
@@ -55,7 +55,7 @@ void page_table_update(uint64_t pt, uint64_t vpn, uint64_t ppn)
                     curr_ppn = curr_pte >> 12;
                 }
 
-                curr_node = phys_to_virt(cur_ppn);
+                curr_node = phys_to_virt(curr_ppn << 12);
                 curr_node[index] = ((curr_ppn << 12) | 1);
             }
             else
@@ -68,10 +68,12 @@ void page_table_update(uint64_t pt, uint64_t vpn, uint64_t ppn)
 
 uint64_t page_table_query(uint64_t pt, uint64_t vpn)
 {
-    uint64_t **curr_node = phys_to_virt(pt);
-    uint64_t index, curr_pte, curr_ppn;
+    uint64_t *curr_node = phys_to_virt(pt << 12);
+    uint64_t index, curr_pte;
     uint64_t mask = 511;
-    for (int i = 0; i < 5; i++)
+    int i;
+
+    for (i = 0; i < 5; i++)
     {
         index = mask & vpn;
         vpn = vpn >> 9;
@@ -81,12 +83,11 @@ uint64_t page_table_query(uint64_t pt, uint64_t vpn)
         {
             return NO_MAPPING;
         }
-        curr_ppn = curr_pte >> 12;
         if (i < 4)
         {
-            curr_node = phys_to_virt(cur_ppn);
+            curr_node = phys_to_virt((curr_pte<<1)>>1);
         }
     }
 
-    return curr_ppn;
+    return curr_pte >> 12;
 }
